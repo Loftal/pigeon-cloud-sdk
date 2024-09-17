@@ -1,0 +1,11 @@
+{
+    "name": "pigeon-cloud/pigeon-cloud-sdk",
+    "type": "library",
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "PigeonCloudSdk\\": "src/"
+        }
+    },
+    "require": {}
+}

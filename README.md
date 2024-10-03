@@ -28,6 +28,7 @@ use PigeonCloudSdk\PigeonCondition;
 use PigeonCloudSdk\PigeonProvider;
 
 // Environment variables need to be loaded.
+// Example: When using phpdotenv, `composer require vlucas/phpdotenv`
 $dotenv = \Dotenv\Dotenv::createImmutable(__DIR__);
 $dotenv->load();
 

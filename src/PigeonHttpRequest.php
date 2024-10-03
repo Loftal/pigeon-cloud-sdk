@@ -22,7 +22,7 @@ class PigeonHttpRequest
             $response = $response_raw;
         }
         if ($debug) {
-            $response_json_unescaped = json_encode($response, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            $response_json_unescaped = json_encode($response, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             echo <<<EOT
                 <pre>
                 【URL】
@@ -55,8 +55,8 @@ class PigeonHttpRequest
         curl_close($curl);
         $response = json_decode($response_raw, true);
         if ($debug) {
-            $form_data_json = json_encode($form_data, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
-            $response_json_unescaped = json_encode($response, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT);
+            $form_data_json = json_encode($form_data, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
+            $response_json_unescaped = json_encode($response, JSON_UNESCAPED_UNICODE|JSON_PRETTY_PRINT|JSON_UNESCAPED_SLASHES);
             echo <<<EOT
                 <pre>
                 【URL】

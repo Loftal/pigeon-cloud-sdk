@@ -78,7 +78,7 @@ class PigeonProvider
         }
     }
 
-    public function fetch(?PigeonCondition $pigeonCondition = null, int $page = 1, int $per_page = 30, string $order = null): array
+    public function fetch(?PigeonCondition $pigeonCondition = null, int $page = 1, int $per_page = 30, ?string $order = null): array
     {
         $form_data = $this->getFormDataTemplate();
         if ($pigeonCondition) {
@@ -86,7 +86,7 @@ class PigeonProvider
         }
         $form_data['limit'] = $per_page;
         $form_data['offset'] = $per_page * ($page - 1);
-        if (!$order) {
+        if (!empty($order)) {
             $form_data['order'] = $order;
         }
         $response = $this->pigeonGateway->getRecord($form_data);
@@ -97,7 +97,7 @@ class PigeonProvider
         return [$datas, $response['count']];
     }
 
-    public function fetchOne(?PigeonCondition $pigeonCondition = null, string $order = null): ?array
+    public function fetchOne(?PigeonCondition $pigeonCondition = null, ?string $order = null): ?array
     {
         list($datas, $count) = $this->fetch($pigeonCondition, 1, 1, $order);
         if (empty($datas)) {
@@ -106,7 +106,7 @@ class PigeonProvider
         return $datas[0];
     }
 
-    public function fetchAll(?PigeonCondition $pigeonCondition = null, string $order = null): array
+    public function fetchAll(?PigeonCondition $pigeonCondition = null, ?string $order = null): array
     {
         $all_datas = [];
         $page = 1;

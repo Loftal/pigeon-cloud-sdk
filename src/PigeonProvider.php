@@ -34,12 +34,21 @@ class PigeonProvider
 
     public function showFields(): void
     {
-        $form_data = $this->getFormDataTemplate();
-        $response = $this->pigeonGateway->getFields($form_data);
+        $response = $this->getFields();
         echo "<pre>";
         var_dump($response);
         echo "</pre>";
         exit(0);
+    }
+
+    public function getFields(): ?array
+    {
+        $form_data = $this->getFormDataTemplate();
+        $response = $this->pigeonGateway->getFields($form_data);
+        if (isset($response['data'])) {
+            return $response['data'];
+        }
+        return null;
     }
 
     private function toPostData(array $datas): array

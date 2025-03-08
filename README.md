@@ -47,15 +47,16 @@ $pigeonCondition->add('and', 'field__1', 'eq', '1');
 $page = 1;
 $per_page = 10;
 $order = 'id desc';
+$fields = ['field__1'];
 
 // fetch list
-list($data, $count) = $pigeonProvider->fetch($pigeonCondition, $page, $per_page, $order);
+list($data, $count) = $pigeonProvider->fetch($pigeonCondition, $page, $per_page, $order, $fields);
 
 // fetch one
-$data = $pigeonProvider->fetchOne($pigeonCondition, $order);
+$data = $pigeonProvider->fetchOne($pigeonCondition, $order, $fields);
 
 // fetch all
-$data_all = $pigeonProvider->fetchAll($pigeonCondition, $order);
+$data_all = $pigeonProvider->fetchAll($pigeonCondition, $order, $fields);
 ```
 
 ### insert

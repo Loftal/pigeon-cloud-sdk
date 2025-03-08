@@ -87,11 +87,14 @@ class PigeonProvider
         }
     }
 
-    public function fetch(?PigeonCondition $pigeonCondition = null, int $page = 1, int $per_page = 30, ?string $order = null): array
+    public function fetch(?PigeonCondition $pigeonCondition = null, int $page = 1, int $per_page = 30, ?string $order = null, ?array $fields = []): array
     {
         $form_data = $this->getFormDataTemplate();
         if ($pigeonCondition) {
             $form_data['condition'] = $pigeonCondition->toArray();
+        }
+        if ($fields) {
+            $form_data['fields'] = $fields;
         }
         $form_data['limit'] = $per_page;
         $form_data['offset'] = $per_page * ($page - 1);
@@ -106,22 +109,22 @@ class PigeonProvider
         return [$datas, $response['count']];
     }
 
-    public function fetchOne(?PigeonCondition $pigeonCondition = null, ?string $order = null): ?array
+    public function fetchOne(?PigeonCondition $pigeonCondition = null, ?string $order = null, ?array $fields = []): ?array
     {
-        list($datas, $count) = $this->fetch($pigeonCondition, 1, 1, $order);
+        list($datas, $count) = $this->fetch($pigeonCondition, 1, 1, $order, $fields);
         if (empty($datas)) {
             return null;
         }
         return $datas[0];
     }
 
-    public function fetchAll(?PigeonCondition $pigeonCondition = null, ?string $order = null): array
+    public function fetchAll(?PigeonCondition $pigeonCondition = null, ?string $order = null, ?array $fields = []): array
     {
         $all_datas = [];
         $page = 1;
         $per_page = 100;
         while (true) {
-            list($datas, $count) = $this->fetch($pigeonCondition, $page, $per_page, $order);
+            list($datas, $count) = $this->fetch($pigeonCondition, $page, $per_page, $order, $fields);
             $all_datas = array_merge($all_datas, $datas);
             $page++;
             if( $per_page * ($page - 1) > $count || $page > 30 ){

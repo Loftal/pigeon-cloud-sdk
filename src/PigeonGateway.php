@@ -43,6 +43,19 @@ class PigeonGateway
     /*
      * @param array{
      *   table: string
+     *   search: array
+     *   limit: int
+     *   offset: int
+     * } $form_data
+     */
+    public function postGetRecord(array $form_data): array
+    {
+        return PigeonHttpRequest::post('/get_record', $form_data, $this->auth, $this->debug);
+    }
+
+    /*
+     * @param array{
+     *   table: string
      *   data: array<array{"id": ?int, "field__X": int|string}>
      * } $form_data
      */

@@ -51,23 +51,28 @@ class PigeonProvider
         return null;
     }
 
-    private function toPostData(array $datas): array
+    private function flattenArray(array $array, string $prefix = ''): array
     {
-        $form_data = $this->getFormDataTemplate();
-        foreach ($datas as $i => $data) {
-            foreach ($data as $key => $val) {
-                if( is_a($val, 'CURLFile') ) {
-                    $form_data["{$key}[{$i}]"] = $val;
-                } elseif (is_array($val)) {
-                    foreach ($val as $j => $v) {
-                        $form_data["data[{$i}][{$key}][{$j}]"] = $v;
-                    }
-                } else {
-                    $form_data["data[{$i}][{$key}]"] = $val;
+        $result = [];
+        foreach ($array as $key => $value) {
+            $newKey = $prefix === '' ? $key : "{$prefix}[{$key}]";
+            if (is_array($value)) {
+                $result += $this->flattenArray($value, $newKey);
+            } else {
+                $result[$newKey] = $value;
+            }
+        }
+        if ($prefix==''){
+            foreach ($result as $key => $value) {
+                if (is_a($value, 'CURLFile')) {
+                    preg_match_all('/\[(.*?)\]/', $key, $matches);
+                    $newKey = "{$matches[1][1]}[{$matches[1][0]}]";
+                    $result[$newKey] = $value;
+                    unset($result[$key]);
                 }
             }
         }
-        return $form_data;
+        return $result;
     }
 
     private function setViewData($data){
@@ -87,7 +92,7 @@ class PigeonProvider
         }
     }
 
-    public function fetch(?PigeonCondition $pigeonCondition = null, int $page = 1, int $per_page = 30, ?string $order = null, ?array $fields = []): array
+    public function fetch(?PigeonCondition $pigeonCondition = null, int $page = 1, int $per_page = 30, ?string $order = null, ?array $fields = [], bool $isPost = false): array
     {
         $form_data = $this->getFormDataTemplate();
         if ($pigeonCondition) {
@@ -101,7 +106,11 @@ class PigeonProvider
         if (!empty($order)) {
             $form_data['order'] = $order;
         }
-        $response = $this->pigeonGateway->getRecord($form_data);
+        if ($isPost) {
+            $response = $this->pigeonGateway->postGetRecord($this->flattenArray($form_data));
+        } else {
+            $response = $this->pigeonGateway->getRecord($form_data);
+        }
         if ($response['result']!='success') {
             throw new \Exception('Pigeon result error.');
         }
@@ -109,22 +118,22 @@ class PigeonProvider
         return [$datas, $response['count']];
     }
 
-    public function fetchOne(?PigeonCondition $pigeonCondition = null, ?string $order = null, ?array $fields = []): ?array
+    public function fetchOne(?PigeonCondition $pigeonCondition = null, ?string $order = null, ?array $fields = [], bool $isPost = false): ?array
     {
-        list($datas, $count) = $this->fetch($pigeonCondition, 1, 1, $order, $fields);
+        list($datas, $count) = $this->fetch($pigeonCondition, 1, 1, $order, $fields, $isPost);
         if (empty($datas)) {
             return null;
         }
         return $datas[0];
     }
 
-    public function fetchAll(?PigeonCondition $pigeonCondition = null, ?string $order = null, ?array $fields = []): array
+    public function fetchAll(?PigeonCondition $pigeonCondition = null, ?string $order = null, ?array $fields = [], bool $isPost = false): array
     {
         $all_datas = [];
         $page = 1;
         $per_page = 100;
         while (true) {
-            list($datas, $count) = $this->fetch($pigeonCondition, $page, $per_page, $order, $fields);
+            list($datas, $count) = $this->fetch($pigeonCondition, $page, $per_page, $order, $fields, $isPost);
             $all_datas = array_merge($all_datas, $datas);
             $page++;
             if( $per_page * ($page - 1) > $count || $page > 30 ){
@@ -136,7 +145,9 @@ class PigeonProvider
 
     public function insert(array $datas): array
     {
-        $form_data = $this->toPostData($datas);
+        $form_data = $this->getFormDataTemplate();
+        $form_data['data'] = $datas;
+        $form_data = $this->flattenArray($form_data);
         $response = $this->pigeonGateway->postRecord($form_data);
         return $response['data'];
     }
@@ -152,7 +163,9 @@ class PigeonProvider
 
     public function update(array $datas): array
     {
-        $form_data = $this->toPostData($datas);
+        $form_data = $this->getFormDataTemplate();
+        $form_data['data'] = $datas;
+        $form_data = $this->flattenArray($form_data);
         $response = $this->pigeonGateway->postUpdateRecord($form_data);
         return $response['data'];
     }

@@ -18,7 +18,7 @@ class PigeonUser
             'limit' => 1
         ];
         $response = PigeonHttpRequest::get('/record', $form_data, $auth);
-        if ($response['result'] != 'success') {
+        if (!is_array($response) || $response['result'] != 'success') {
             return false;
         }
         $_SESSION['pigeon_user'] = [

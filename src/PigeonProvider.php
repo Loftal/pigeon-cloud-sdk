@@ -12,19 +12,24 @@ class PigeonProvider
         $this->table_id = $table_id;
         $this->table_key = ctype_digit($table_id)? 'table_id' : 'table';
         if ($useSession) {
-            if (!isset($_SESSION['pigeon_user']['auth'])) {
-                throw new \Exception('Pigeon User No Auth Error.');
-            }
-            $auth = $_SESSION['pigeon_user']['auth'];
+            $this->useSession();
         } else {
             $auth = PigeonUtil::getMasterAuth();
+            $this->pigeonGateway = new PigeonGateway($auth);
         }
-        $this->pigeonGateway = new PigeonGateway($auth);
     }
 
     public function setDebug(bool $debug = true): void
     {
         $this->pigeonGateway->setDebug($debug);
+    }
+
+    public function useSession(): void
+    {
+        if (!isset($_SESSION['pigeon_user']['auth'])) {
+            throw new \Exception('Pigeon User No Auth Error.');
+        }
+        $this->pigeonGateway = new PigeonGateway($_SESSION['pigeon_user']['auth']);
     }
 
     public function getFormDataTemplate(): array
